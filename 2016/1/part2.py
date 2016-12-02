@@ -2,12 +2,21 @@ import sys
 from enum import IntEnum
 
 def main():
-    facing = Direction.North
-    coords = [0, 0]
-    visited = [[0, 0]]
 
     input = load_file('input-1.txt')
     input_list = input.replace(',', '').split(' ')
+
+    ans = go(input_list)
+
+    blocks = calculate_blocks(ans)
+    print(ans)
+    print(blocks)
+
+
+def go(input_list):
+    facing = Direction.North
+    coords = [0, 0]
+    visited = [[0, 0]]
 
     for instr in input_list:
         direction = instr[0]
@@ -18,20 +27,24 @@ def main():
         elif direction == 'R':
             facing = change_direction(1, facing)
 
-        print('visited: ' + str(visited))
-
-        print('before: ' + str(coords))
+        travelled = travel(coords, facing, dist)
         coords = change_coords(facing, dist, coords)
-        print('after: ' + str(coords))
+        
+        for item in travelled:
+            if item in visited:
+                return item
+            else:
+                visited.append(item.copy())
 
-        if coords in visited:
-            break
-        else:
-            visited.append(coords)
 
+def travel(start, direction, distance):
+    travelled = []
+    current = start.copy()
 
-    blocks = calculate_blocks(coords)
-    print(blocks)
+    for i in range(0, distance):
+        travelled.append(change_coords(direction, 1, current).copy())
+
+    return travelled
 
 
 def calculate_blocks(coords):
