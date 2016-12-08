@@ -2,6 +2,7 @@ import re
 
 pattern = r'(\[[a-z]*\])'
 
+# This could use improvement, like in part 2.
 def main():
     data = load_input('input-1.txt'); ans = 0
     for line in data:
@@ -14,7 +15,6 @@ def main():
                 valid = True
         if valid:
             ans += 1
-
     print(ans)
 
 
