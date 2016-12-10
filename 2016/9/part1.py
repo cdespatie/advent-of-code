@@ -8,8 +8,7 @@ def main():
         char = data.pop(0)
         if char == '(':
             code = find_code(data)
-            counter += len(code)
-            digits = list(map(int, re.search(pattern, code).groups()))
+            digits = [int(i) for i in re.search(pattern, code).groups()]
             pop_n(data, digits[0])
             counter += digits[0] * digits[1]
         else:
@@ -20,7 +19,6 @@ def main():
 def pop_n(data, n):
     for i in range(n):
         data.pop(0)
-
 
 def find_code(data):
     char = data.pop(0)
