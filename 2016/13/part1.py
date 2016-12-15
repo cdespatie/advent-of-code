@@ -39,7 +39,7 @@ def shortest_path(node):
 class Node:
     def __init__(self, x, y, g_score, dest, came_from):
         self.x = x; self.y = y
-        self.dest = dest 
+        self.dest = dest
         self.g_score = g_score
         self.f_score = self.get_f_score()
         self.came_from = came_from
@@ -78,3 +78,4 @@ def is_wall(x, y):
 
 if __name__ == '__main__':
     main()
+
