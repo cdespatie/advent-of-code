@@ -25,13 +25,13 @@ fn part_2(input: &mut Vec<u32>) {
     for (i, x) in input.iter().enumerate() {
         let mut index = 0;
 
-        if (length / 2) + i > length {
-            index = length - (length / 2 + i);
+        if i + (length / 2) > (length - 1) {
+            index = i - (length / 2);
         }
         else {
             index = (length / 2) + i;
         }
-        
+
         if *x == input[index] {
             sum = &sum + x;
         }
@@ -51,14 +51,15 @@ fn part_1(input: &mut Vec<u32>) {
         if x == &prev {
             sum = &sum + x;
         }
-        
+
         prev = *x;
     }
 
     if last == input[0] {
         sum = sum + last;
     }
-    
+
     println!("--- part 1 ---");
     println!("{:?}", sum);
 }
+
