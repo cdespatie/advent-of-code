@@ -23,17 +23,13 @@ fn main() {
 
 fn check_anagrams(input: &Vec<&str>) -> bool {
     let mut hash = HashSet::new();
+    let sorted = input.iter().map(|x| sort_word(x));
 
-    for &word in input {
-        if hash.contains(word) {
+    for word in sorted {
+        if hash.contains(&word) {
             return false;
         }
-
-        let permutations = get_permutations(word);
-
-        for perm in permutations {
-            hash.insert(perm);
-        }
+        hash.insert(word);
     }
 
     true
@@ -51,6 +47,18 @@ fn check_duplicates(input: &Vec<&str>) -> bool {
 
     true
 }
+
+fn sort_word(input: &str) -> String {
+    let mut word: Vec<char> = input.chars().collect();
+
+    word.sort_by(|a, b| b.cmp(a));
+    word.into_iter().collect::<String>()
+}
+
+// After solving, I discovered this wasn't necessary!
+// Anagrams can be found simply by sorting the words and checking
+// for duplicates. D'oh. Keeping this around; should be useful in
+// future problems. Maybe extract to crate?
 
 fn get_permutations(input: &str) -> Vec<String> {
     let mut output = Vec::new();
