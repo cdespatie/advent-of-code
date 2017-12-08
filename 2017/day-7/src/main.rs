@@ -22,39 +22,42 @@ fn main() {
 }
 
 fn part_2(input: &str) {
-    let mut programs = Vec::new();
+    // let mut programs = Vec::new();
     let re = Regex::new(r"([a-z]+ )\(([0-9]+)\)(?: -> )?(.+)?").unwrap();
 
-    for capture in re.captures_iter(input) {
-        programs.push(Program::new(&capture[1], capture[2].parse::<u32>().unwrap()));
-    }
+    // for capture in re.captures_iter(input) {
+    //     programs.push(Program::new(&capture[1], capture[2].parse::<u32>().unwrap()));
+    // }
 
-    for capture in re.captures_iter(input) {
-        let above: Vec<_> = capture[3].split(", ").collect();
-        if above.len() > 0 {
-            let pos: usize = programs.iter().position(|x| x.name == capture[1]).unwrap();
-            let current = programs.get(pos).unwrap();
+    // for capture in re.captures_iter(input) {
+    //     let above: Vec<_> = capture[3].split(", ").collect();
+    //     if above.len() > 0 {
+    //         let pos: usize = programs.iter().position(|x| x.name == capture[1]).unwrap();
+    //         let current = programs.get(pos).unwrap();
+    //     }
+    // }
 
-            current.children = programs.iter().filter(|x| above.contains(&x.name.as_str())).collect();
-        }
-    }
-
-    println!("{:?}", programs);
+    // println!("{:?}", programs);
 }
 
 #[derive(Debug)]
-struct Program {
-    name: String,
-    weight: u32,
-    children: Vec<Program>
+struct Graph {
+    nodes: Vec<Node>
 }
 
-impl Program {
-    pub fn new(name: &str, weight: u32) -> Program {
-        Program {
+#[derive(Debug)]
+struct Node {
+    name: String,
+    weight: u32,
+    children: Option<Vec<usize>>
+}
+
+impl Node {
+    pub fn new(name: &str, weight: u32) -> Node {
+        Node {
             name: name.to_string(),
             weight: weight,
-            children: Vec::new()
+            children: None
         }
     }
 }
