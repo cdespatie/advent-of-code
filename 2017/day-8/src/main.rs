@@ -8,13 +8,12 @@ use std::collections::HashMap;
 // d dec -220 if h == 0
 
 fn main() {
+    let mut max: i32 = 0;
     let mut map: HashMap<String, i32> = HashMap::new();
     let input = include_str!("../input.txt");
     let re = Regex::new(r"([a-z]+) ([a-z]+) (-*\d+) if ([a-z]+) ([><!=]+) (-*\d+)").unwrap();
 
-    let mut counter = 0;
     for cap in re.captures_iter(input) {
-        counter += 1;
         let test_amt = if map.contains_key(&cap[4].to_string()) {
             *map.get(&cap[4].to_string()).unwrap()
         }
@@ -29,21 +28,28 @@ fn main() {
             "!=" => test_amt != cap[6].parse::<i32>().unwrap(),
             ">=" => test_amt >= cap[6].parse::<i32>().unwrap(),
             "<=" => test_amt <= cap[6].parse::<i32>().unwrap(),
-            _ => { println!("shit"); false }
+            _ => { println!("Something didn't parse!"); false }
         };
 
         if test {
             let oper = cap[3].parse::<i32>().unwrap();
             match &cap[2] {
-                "inc" => *map.entry(cap[1].to_string()).or_insert(oper) += oper,
-                "dec" => *map.entry(cap[1].to_string()).or_insert(-oper) -= oper,
+                "inc" => *map.entry(cap[1].to_string()).or_insert(0) += oper,
+                "dec" => *map.entry(cap[1].to_string()).or_insert(0) -= oper,
                 _ => ()
             };
         }
+
+        let curr_max: i32 = *map.iter().max_by_key(|&(_, val)| val).unwrap().1;
+        max = if curr_max > max {
+            curr_max
+        }
+        else {
+            max
+        }
     }
 
-    println!("{:?}", counter);
-    println!("{:?}", map);
-    println!("{:?}", map.iter().max_by_key(|&(_, val)| val).unwrap());
+    println!("Max value seen: {:?}", max);
+    println!("Last max value: {:?}", map.iter().max_by_key(|&(_, val)| val).unwrap());
 }
 
