@@ -5,3 +5,4 @@ authors = ["Chris Despatie <mail@chrisdespatie.com>"]
 
 [dependencies]
 regex = "0.2"
+petgraph = "0.4.10"

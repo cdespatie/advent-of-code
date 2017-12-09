@@ -1,6 +1,13 @@
 extern crate regex;
+extern crate petgraph;
+
+use std::collections::HashMap;
 
 use regex::Regex;
+
+use petgraph::Graph;
+use petgraph::visit::Dfs;
+use petgraph::graph::NodeIndex;
 
 fn main() {
     let text = include_str!("../input.txt");
@@ -22,42 +29,46 @@ fn main() {
 }
 
 fn part_2(input: &str) {
-    // let mut programs = Vec::new();
+    let mut first = true;
+    let mut graph = Graph::<_, ()>::new();
     let re = Regex::new(r"([a-z]+ )\(([0-9]+)\)(?: -> )?(.+)?").unwrap();
+    let mut nodes = HashMap::new();
 
-    // for capture in re.captures_iter(input) {
-    //     programs.push(Program::new(&capture[1], capture[2].parse::<u32>().unwrap()));
-    // }
 
-    // for capture in re.captures_iter(input) {
-    //     let above: Vec<_> = capture[3].split(", ").collect();
-    //     if above.len() > 0 {
-    //         let pos: usize = programs.iter().position(|x| x.name == capture[1]).unwrap();
-    //         let current = programs.get(pos).unwrap();
-    //     }
-    // }
+    for capture in re.captures_iter(input) {
+        let index = graph.add_node(Program::new(&capture[1].trim(), capture[2].parse::<u32>().unwrap()));
+        nodes.insert(capture[1].trim().to_string(), index);
+    }
 
-    // println!("{:?}", programs);
+    for capture in re.captures_iter(input) {
+        for connected in capture[3].trim_right_matches("\r").split(", ") {
+            if connected != "" {
+                let base = nodes.get(&capture[1].trim().to_string()).unwrap();
+                let conn = nodes.get(connected.trim()).unwrap();
+                graph.update_edge(*base, *conn, ());
+            }
+        }
+    }
+
+    let &root = nodes.get("vgzejbd").unwrap();
+
+    let mut dfs = Dfs::new(&graph, root);
+    while let Some(n) = dfs.next(&graph) {
+        println!("{:?}", graph.node_weight(n));
+    }
 }
 
 #[derive(Debug)]
-struct Graph {
-    nodes: Vec<Node>
-}
-
-#[derive(Debug)]
-struct Node {
+struct Program {
     name: String,
-    weight: u32,
-    children: Option<Vec<usize>>
+    weight: u32
 }
 
-impl Node {
-    pub fn new(name: &str, weight: u32) -> Node {
-        Node {
+impl Program {
+    pub fn new(name: &str, weight: u32) -> Program {
+        Program {
             name: name.to_string(),
-            weight: weight,
-            children: None
+            weight: weight
         }
     }
 }
