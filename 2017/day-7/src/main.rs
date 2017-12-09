@@ -1,39 +1,24 @@
 extern crate regex;
 extern crate petgraph;
+extern crate itertools;
 
 use std::collections::HashMap;
 
 use regex::Regex;
+use itertools::Itertools;
 
 use petgraph::Graph;
-use petgraph::visit::Dfs;
-use petgraph::graph::NodeIndex;
+use petgraph::algo::toposort;
 
 fn main() {
     let text = include_str!("../input.txt");
-    part_2(text);
-
-    // let split: Vec<Vec<_>> = text.lines().map(|x| x.split("->").collect()).collect();
-
-    // let left: Vec<_> = split.iter().filter_map(|x| x.get(0)).map(|x| x.trim()).collect();
-    // let right: Vec<_> = split.iter().filter_map(|x| x.get(1)).map(|x| x.trim()).collect();
-
-    // let all_prgs: Vec<&str> = left.iter().flat_map(|x| x.split_whitespace())
-    //                                      .filter(|x| !x.starts_with("(")).collect();
-
-    // let stacked_prgs: Vec<&str> = right.iter().flat_map(|x| x.split(", ")).collect();
-
-    // let base: Vec<_> = all_prgs.iter().filter(|x| !stacked_prgs.contains(x)).collect();
-
-    // println!("{:?}", base);
+    solve(text);
 }
 
-fn part_2(input: &str) {
-    let mut first = true;
+fn solve(input: &str) {
     let mut graph = Graph::<_, ()>::new();
     let re = Regex::new(r"([a-z]+ )\(([0-9]+)\)(?: -> )?(.+)?").unwrap();
     let mut nodes = HashMap::new();
-
 
     for capture in re.captures_iter(input) {
         let index = graph.add_node(Program::new(&capture[1].trim(), capture[2].parse::<u32>().unwrap()));
@@ -50,25 +35,44 @@ fn part_2(input: &str) {
         }
     }
 
-    let &root = nodes.get("vgzejbd").unwrap();
+    let sorted_graph = toposort(&graph, None).unwrap();
+    println!("Root node: {}", graph[sorted_graph[0]].name);
 
-    let mut dfs = Dfs::new(&graph, root);
-    while let Some(n) = dfs.next(&graph) {
-        println!("{:?}", graph.node_weight(n));
+    for &node in sorted_graph.iter().rev() {
+        if !graph.neighbors(node).map(|x| graph[x].total).all_equal() {
+            let (min, max) = graph.neighbors(node).map(|x| graph[x].total).minmax().into_option().unwrap();
+            let (left, right): (Vec<_>, Vec<_>) = graph.neighbors(node).partition(|&x| graph[x].total == min);
+
+            let unbalanced = if left.len() == 1 {
+                &graph[left[0]]
+            }
+            else {
+                &graph[right[0]]
+            };
+
+            println!("Unbalanced node: {:?}", unbalanced);
+            println!("Adjusted weight: {}", unbalanced.weight + min - max);
+
+            break;
+        }
+
+        graph[node].total += graph.neighbors(node).map(|x| graph[x].total).sum::<u32>();
     }
 }
 
 #[derive(Debug)]
 struct Program {
     name: String,
-    weight: u32
+    weight: u32,
+    total: u32
 }
 
 impl Program {
     pub fn new(name: &str, weight: u32) -> Program {
         Program {
             name: name.to_string(),
-            weight: weight
+            weight: weight,
+            total: weight
         }
     }
 }
