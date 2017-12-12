@@ -6,24 +6,24 @@ fn main() {
     for i in input.chars() {
         parsed.push(i as usize);
     }
-    println!("{:?}", parsed);
     parsed.append(&mut const_chars);
-    println!("{:?}", parsed);
 
     let ascii_chars: String = parsed.iter().map(|x| x.to_string())
         .collect::<Vec<String>>().join(",");
 
-    knot_hash(ascii_chars, 64);
+    println!("Part 1: {:?}", part_1(input));
+    println!("Part 2: {:?}", knot_hash(ascii_chars, 64));
 }
 
-fn knot_hash(input: String, reps: usize) {
+fn knot_hash(input: String, reps: usize) -> String {
     let mut start: usize = 0;
     let mut skip: usize = 0;
     let mut vector: Vec<usize> = Vec::new();
+    let mut dense = Vec::new();
 
     for i in 0..256 { vector.push(i); }
 
-    for rep in 0..reps {
+    for _ in 0..reps {
         for n in input.split(",") {
             let split = get_split(&vector, start, n.parse::<usize>().unwrap());
 
@@ -36,8 +36,6 @@ fn knot_hash(input: String, reps: usize) {
         }
     }
 
-    let mut dense = Vec::new();
-
     for i in 0..16 {
         let mut temp = 0;
         for j in 0..16 {
@@ -47,15 +45,10 @@ fn knot_hash(input: String, reps: usize) {
         dense.push(temp);
     }
 
-    println!("{:?}", dense);
-    println!("{:?}", convert_hex(dense));
+    convert_hex(dense)
 }
 
-fn convert_hex(input: Vec<usize>) -> String {
-    input.iter().map(|x| format!("{:x}", x)).collect::<Vec<_>>().join("")
-}
-
-fn part_1(input: &str) {
+fn part_1(input: &str) -> usize {
     let mut vector: Vec<usize> = Vec::new();
     let mut start: usize = 0;
     for i in 0..256 { vector.push(i); }
@@ -70,8 +63,11 @@ fn part_1(input: &str) {
         start = (start + split.len() + skip) % 256;
     }
 
-    println!("{:?}", vector);
-    println!("Part 1: {}", vector[0] * vector[1]);
+    vector[0] * vector[1]
+}
+
+fn convert_hex(input: Vec<usize>) -> String {
+    input.iter().map(|x| format!("{:02x}", x)).collect::<Vec<_>>().join("")
 }
 
 fn get_split(input: &Vec<usize>, start: usize, len: usize) -> Vec<usize> {
