@@ -14,6 +14,32 @@ fn solve(input: &str) {
 
     map.sort_by_key(|&(x, _)| x);
 
+    part_1(&map);
+    part_2(&map);
+}
+
+fn part_2(map: &Vec<(usize, usize)>) {
+    let mut counter = 0;
+
+    'outer: loop {
+        for i in 0..map.last().unwrap().0 + 1 {
+            match map.iter().find(|x| x.0 == i) {
+                Some(x) => {
+                    if (i + counter) % ((x.1 - 1) * 2) == 0 {
+                        counter += 1;
+                        continue 'outer;
+                    }
+                },
+                _ => ()
+            };
+        }
+
+        println!("{}", counter);
+        break;
+    }
+}
+
+fn part_1(map: &Vec<(usize, usize)>) {
     let mut counter = 0;
     for i in 0..map.last().unwrap().0 + 1 {
         match map.iter().find(|x| x.0 == i) {
