@@ -15,7 +15,7 @@ fn main() {
     println!("Part 2: {:?}", knot_hash(ascii_chars, 64));
 }
 
-fn knot_hash(input: String, reps: usize) -> String {
+pub fn knot_hash(input: String, reps: usize) -> String {
     let mut start: usize = 0;
     let mut skip: usize = 0;
     let mut vector: Vec<usize> = Vec::new();
