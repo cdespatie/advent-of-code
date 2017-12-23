@@ -34,12 +34,26 @@ fn solve(input: &str) {
                 graph.add_node((i, j));
             }
         }
+    }
 
-        // TODO: Check all (n,e,s,w) nodes for '1' and add edges.
+    for (j, row) in map.iter().enumerate() {
+        for (i, entry) in row.iter().enumerate() {
+            if i > 0 && map[j][i - 1] == 1 {
+                println!("Edge!");
+            }
+            if i < 127 && map[j][i + 1] == 1 {
+                println!("Edge!");
+            }
+            if j > 0 && map[j - 1][i] == 1 {
+                println!("Edge!");
+            }
+            if j < 127 && map[j + 1][i] == 1 {
+                println!("Edge!");
+            }
+        }
     }
 
     println!("{}", counter);
-    println!("{:?}", graph);
 }
 
 fn to_bits(input: String) -> String {
