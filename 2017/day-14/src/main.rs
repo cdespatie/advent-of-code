@@ -1,3 +1,7 @@
+extern crate petgraph;
+
+use petgraph::Graph;
+
 fn main() {
     let input = "jxqlasbh";
     solve(input);
@@ -7,9 +11,10 @@ fn solve(input: &str) {
     let base = input.to_string();
     let mut counter = 0;
     let mut map: Vec<Vec<u32>> = Vec::new();
+    let mut graph = Graph::<(usize, usize), usize>::new();
 
-    for i in 0..128 {
-        let string: String = format!("{}-{}", base, i.to_string());
+    for j in 0..128 {
+        let string: String = format!("{}-{}", base, j.to_string());
         let hash = knot_hash(string, 64);
 
         let bits = to_bits(hash);
@@ -22,10 +27,19 @@ fn solve(input: &str) {
                 _   => ()
             };
         }
+
+        // Part 2
+        for (i, c) in bits.chars().enumerate() {
+            if c == '1' {
+                graph.add_node((i, j));
+            }
+        }
+
+        // TODO: Check all (n,e,s,w) nodes for '1' and add edges.
     }
 
     println!("{}", counter);
-    println!("{:?}", map);
+    println!("{:?}", graph);
 }
 
 fn to_bits(input: String) -> String {
