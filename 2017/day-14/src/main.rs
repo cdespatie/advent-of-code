@@ -1,6 +1,10 @@
 extern crate petgraph;
 
 use petgraph::Graph;
+use petgraph::graph::NodeIndex;
+use petgraph::visit::Dfs;
+
+use std::collections::HashSet;
 
 fn main() {
     let input = "jxqlasbh";
@@ -12,10 +16,13 @@ fn solve(input: &str) {
     let mut counter = 0;
     let mut map: Vec<Vec<u32>> = Vec::new();
     let mut graph = Graph::<(usize, usize), usize>::new();
+    let mut graph_nodes: Vec<Vec<Option<NodeIndex>>> = Vec::new();
+    let mut visited: HashSet<petgraph::prelude::NodeIndex> = HashSet::new();
 
     for j in 0..128 {
         let string: String = format!("{}-{}", base, j.to_string());
         let hash = knot_hash(string, 64);
+        graph_nodes.push(Vec::new());
 
         let bits = to_bits(hash);
         map.push(bits.chars().flat_map(|x| x.to_digit(10)).collect());
@@ -31,29 +38,54 @@ fn solve(input: &str) {
         // Part 2
         for (i, c) in bits.chars().enumerate() {
             if c == '1' {
-                graph.add_node((i, j));
+                let node = graph.add_node((i, j));
+                graph_nodes[j].push(Some(node));
+            }
+            else {
+                graph_nodes[j].push(None);
             }
         }
     }
 
     for (j, row) in map.iter().enumerate() {
         for (i, entry) in row.iter().enumerate() {
-            if i > 0 && map[j][i - 1] == 1 {
-                println!("Edge!");
-            }
-            if i < 127 && map[j][i + 1] == 1 {
-                println!("Edge!");
-            }
-            if j > 0 && map[j - 1][i] == 1 {
-                println!("Edge!");
-            }
-            if j < 127 && map[j + 1][i] == 1 {
-                println!("Edge!");
+            if *entry == 1 {
+                if i > 0 && map[j][i - 1] == 1 {
+                    graph.add_edge(graph_nodes[j][i].unwrap(), graph_nodes[j][i - 1].unwrap(), 0);
+                }
+                if i < 127 && map[j][i + 1] == 1 {
+                    graph.add_edge(graph_nodes[j][i].unwrap(), graph_nodes[j][i + 1].unwrap(), 0);
+                }
+                if j > 0 && map[j - 1][i] == 1 {
+                    graph.add_edge(graph_nodes[j][i].unwrap(), graph_nodes[j - 1][i].unwrap(), 0);
+                }
+                if j < 127 && map[j + 1][i] == 1 {
+                    graph.add_edge(graph_nodes[j][i].unwrap(), graph_nodes[j + 1][i].unwrap(), 0);
+                }
             }
         }
     }
 
+    let mut components = 0;
+    for row in graph_nodes.iter() {
+        for node in row.iter() {
+            match *node {
+                Some(n) => {
+                    if !visited.contains(&n) {
+                        components += 1;
+                        let mut visitor = Dfs::new(&graph, n);
+                        while let Some(x) = visitor.next(&graph) {
+                            visited.insert(x);
+                        }
+                    }
+                },
+                _ => ()
+            };
+        }
+    }
+
     println!("{}", counter);
+    println!("{}", components);
 }
 
 fn to_bits(input: String) -> String {
