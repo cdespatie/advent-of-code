@@ -1,5 +1,6 @@
 import day1.*
+import day2.*
 
 fun main(args: Array<String>) {
-    day1()
+    day2()
 }
