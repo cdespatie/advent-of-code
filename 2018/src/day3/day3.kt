@@ -17,6 +17,7 @@ fun bothParts(instructions: Collection<Instruction>) {
             for (j in instruction.y until (instruction.y + instruction.height)) {
                 if (array[i][j] != "-" && array[i][j] != "#") {
                     markInstructionIncomplete(instructions, array[i][j])
+                    markInstructionIncomplete(instructions, instruction.id.toString())
                     array[i][j] = "#"
                 }
                 else {
