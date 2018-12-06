@@ -1,6 +1,9 @@
 package day4
 
 import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 fun day4() {
     val inputLines = File("./src/day4/input.txt").readLines()
@@ -10,9 +13,9 @@ fun day4() {
 }
 
 fun part1(input: Collection<Event>) {
-    val guardMap = HashMap<String, Long>()
+    val guardMap = HashMap<String, MutableCollection<TimeRange>>()
     var currentGuard = ""
-    var currentTimestamp = 0L
+    var currentTimestamp = LocalDateTime.now()
 
     for (event in input) {
         when {
@@ -23,15 +26,21 @@ fun part1(input: Collection<Event>) {
                 currentTimestamp = event.timestamp
             }
             else -> {
-                guardMap[currentGuard] = guardMap[currentGuard]?.plus((event.timestamp - currentTimestamp)) ?: 0
+                if (guardMap.containsKey(currentGuard)) {
+                    guardMap[currentGuard]?.add(TimeRange(currentTimestamp, event.timestamp))
+                }
+                else {
+                    guardMap[currentGuard] = mutableListOf(TimeRange(currentTimestamp, event.timestamp))
+                }
             }
         }
     }
 
-    val biggest = guardMap.toList().sortedBy { (_, value) -> value }.last()
+    val biggest = guardMap.mapValues { x -> x.value.sumBy { y -> y.startTime.until(y.endTime, ChronoUnit.SECONDS).toInt() } }
+        .toList().sortedBy { (_, x) -> x }.last()
 
-    println(guardMap)
     println(biggest)
+    println(guardMap[biggest.first])
 }
 
 fun getGuardId(input: String): String {
@@ -42,12 +51,14 @@ fun getGuardId(input: String): String {
 }
 
 fun parse(input: String): Event {
+    val dateFormat = "yyyy-MM-dd HH:mm"
+
     val regex = Regex("\\[(.*)\\] (.*)")
     val match = regex.find(input.trim())
     val groupVals = match?.groupValues
 
-    return Event(groupVals?.get(1)?.replace("-", "")?.replace(":", "")
-        ?.replace(" ", "")?.toLong() ?: 0, groupVals?.get(2) ?: "")
+    return Event(LocalDateTime.parse(groupVals?.get(1) ?: "", DateTimeFormatter.ofPattern(dateFormat)), groupVals?.get(2) ?: "")
 }
 
-data class Event(val timestamp: Long, val value: String)
+data class Event(val timestamp: LocalDateTime, val value: String)
+data class TimeRange(val startTime: LocalDateTime, val endTime: LocalDateTime)
