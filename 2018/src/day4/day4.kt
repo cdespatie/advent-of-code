@@ -39,8 +39,15 @@ fun part1(input: Collection<Event>) {
     val biggest = guardMap.mapValues { x -> x.value.sumBy { y -> y.startTime.until(y.endTime, ChronoUnit.SECONDS).toInt() } }
         .toList().sortedBy { (_, x) -> x }.last()
 
-    println(biggest)
-    println(guardMap[biggest.first])
+//    println(biggest)
+//    println(guardMap[biggest.first])
+    findOverlap(guardMap[biggest.first] ?: emptyList())
+}
+
+fun findOverlap(input: Collection<TimeRange>) {
+    for (x in input) {
+        println(x)
+    }
 }
 
 fun getGuardId(input: String): String {
