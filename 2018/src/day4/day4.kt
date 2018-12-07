@@ -1,8 +1,10 @@
 package day4
 
 import java.io.File
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoField
 import java.time.temporal.ChronoUnit
 
 fun day4() {
@@ -39,15 +41,37 @@ fun part1(input: Collection<Event>) {
     val biggest = guardMap.mapValues { x -> x.value.sumBy { y -> y.startTime.until(y.endTime, ChronoUnit.SECONDS).toInt() } }
         .toList().sortedBy { (_, x) -> x }.last()
 
-//    println(biggest)
-//    println(guardMap[biggest.first])
-    findOverlap(guardMap[biggest.first] ?: emptyList())
+    val overlapMinute = findOverlap(guardMap[biggest.first] ?: emptyList())
+    println(overlapMinute.first * biggest.first.toInt())
+
+    var highest = Pair(0, 0)
+    var highestGuard = ""
+
+    for (guard in guardMap) {
+        val overlap = findOverlap(guard.value)
+        if (overlap.second > highest.second) {
+            highest = overlap
+            highestGuard = guard.key
+        }
+    }
+
+    println("$highestGuard $highest")
+    println(highestGuard.toInt() * highest.first)
 }
 
-fun findOverlap(input: Collection<TimeRange>) {
-    for (x in input) {
-        println(x)
+fun findOverlap(input: Collection<TimeRange>): Pair<Int, Int> {
+    val dayMap = HashMap<Int, Int>()
+    val groupedByDate = input.groupBy { x -> x.startTime.toLocalDate() }
+
+    for (day in groupedByDate) {
+        for (min in 0 until 60) {
+            if (day.value.any { y -> y.startTime.minute <= min && y.endTime.minute > min }) {
+                dayMap[min] = (dayMap[min] ?: 0) + 1
+            }
+        }
     }
+
+    return (dayMap.toList().sortedBy { (_, x) -> x }).last()
 }
 
 fun getGuardId(input: String): String {
