@@ -14,9 +14,6 @@ class Computer:
             code = int(str(raw_code)[-2:])
             parameter_modes = [int(x) for x in str(raw_code)[:-2]][::-1]
 
-            time.sleep(0.5)
-            print(f'Pos: {self.position}, Code: {code}, Param modes: {parameter_modes}')
-
             if code == 99:
                 break
             elif code == 1:
@@ -26,13 +23,13 @@ class Computer:
             elif code == 3:
                 self.user_input()
             elif code == 4:
-                self.user_output()
+                self.user_output(parameter_modes)
 
         return self.opcodes
 
     def add(self, parameter_modes):
         param_1 = self.get_value(self.position + 1, self.get_parameter(0, parameter_modes))
-        param_2 = self.get_value(self.position + 2, self.get_parameter(0, parameter_modes))
+        param_2 = self.get_value(self.position + 2, self.get_parameter(1, parameter_modes))
         target = self.get_value(self.position + 3, 1)
 
         self.opcodes[target] = param_1 + param_2
@@ -40,12 +37,12 @@ class Computer:
 
     def multiply(self, parameter_modes):
         param_1 = self.get_value(self.position + 1, self.get_parameter(0, parameter_modes))
-        param_2 = self.get_value(self.position + 2, self.get_parameter(0, parameter_modes))
+        param_2 = self.get_value(self.position + 2, self.get_parameter(1, parameter_modes))
         target = self.get_value(self.position + 3, 1)
 
         self.opcodes[target] = param_1 * param_2
         self.position += 4
-        
+
     def user_input(self):
         target = self.get_value(self.position + 1, 1)
         val = int(input('Input value: '))
@@ -53,9 +50,9 @@ class Computer:
 
         self.position += 2
 
-    def user_output(self):
-        target = self.get_value(self.position + 1, 1)
-        print('Output: ' + str(self.opcodes[target]))
+    def user_output(self, parameter_modes):
+        val = self.get_value(self.position + 1, self.get_parameter(0, parameter_modes))
+        print('Output: ' + str(val))
 
         self.position += 2
 
@@ -69,7 +66,7 @@ class Computer:
             return self.opcodes[target]
 
     def get_parameter(self, index, modes):
-        if len(modes) == 0 or len(modes) >= index:
+        if len(modes) == 0 or len(modes) <= index:
             return 0
         else:
             return modes[index]
@@ -77,26 +74,7 @@ class Computer:
 
 def part1():
     computer = Computer(data())
-    # computer.print_program()
-
     return computer.compute()
-
-def compute(opcodes):
-    position = 0
-
-    while True:
-        code = opcodes[position]
-
-        if code == 99: # Term program
-            break
-        elif code == 1: # Add
-            opcodes[opcodes[position + 3]] = opcodes[opcodes[position + 1]] + opcodes[opcodes[position + 2]]
-        elif code == 2: # Multiply
-            opcodes[opcodes[position + 3]] = opcodes[opcodes[position + 1]] * opcodes[opcodes[position + 2]]
-
-        position += 4
-
-    return opcodes
 
 def data():
     return [int(x) for x in open('input.txt', 'r').read().split(',')]
