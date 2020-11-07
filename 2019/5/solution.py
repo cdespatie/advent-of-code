@@ -14,6 +14,9 @@ class Computer:
             code = int(str(raw_code)[-2:])
             parameter_modes = [int(x) for x in str(raw_code)[:-2]][::-1]
 
+            # time.sleep(0.5)
+            # print(f'position: {self.position}, code: {code}, parameter_modes: {parameter_modes}')
+
             if code == 99:
                 break
             elif code == 1:
@@ -24,6 +27,14 @@ class Computer:
                 self.user_input()
             elif code == 4:
                 self.user_output(parameter_modes)
+            elif code == 5:
+                self.jump_if_true(parameter_modes)
+            elif code == 6:
+                self.jump_if_false(parameter_modes)
+            elif code == 7:
+                self.less_than(parameter_modes)
+            elif code == 8:
+                self.equals(parameter_modes)
 
         return self.opcodes
 
@@ -55,6 +66,48 @@ class Computer:
         print('Output: ' + str(val))
 
         self.position += 2
+
+    def jump_if_true(self, parameter_modes):
+        param_1 = self.get_value(self.position + 1, self.get_parameter(0, parameter_modes))
+        param_2 = self.get_value(self.position + 2, self.get_parameter(1, parameter_modes))
+
+        if param_1 != 0:
+            self.position = param_2
+        else:
+            self.position += 3
+
+    def jump_if_false(self, parameter_modes):
+        param_1 = self.get_value(self.position + 1, self.get_parameter(0, parameter_modes))
+        param_2 = self.get_value(self.position + 2, self.get_parameter(1, parameter_modes))
+
+        if param_1 == 0:
+            self.position = param_2
+        else:
+            self.position += 3
+
+    def less_than(self, parameter_modes):
+        param_1 = self.get_value(self.position + 1, self.get_parameter(0, parameter_modes))
+        param_2 = self.get_value(self.position + 2, self.get_parameter(1, parameter_modes))
+        target = self.get_value(self.position + 3, 1)
+
+        if param_1 < param_2:
+            self.opcodes[target] = 1
+        else:
+            self.opcodes[target] = 0
+
+        self.position += 4
+
+    def equals(self, parameter_modes):
+        param_1 = self.get_value(self.position + 1, self.get_parameter(0, parameter_modes))
+        param_2 = self.get_value(self.position + 2, self.get_parameter(1, parameter_modes))
+        target = self.get_value(self.position + 3, 1)
+
+        if param_1 == param_2:
+            self.opcodes[target] = 1
+        else:
+            self.opcodes[target] = 0
+
+        self.position += 4
 
     def get_code(self):
         return self.opcodes[self.position]
